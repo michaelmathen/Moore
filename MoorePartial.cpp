@@ -6,6 +6,7 @@
  */
 #include <vector>
 #include <tuple>
+#include <iostream>
 #include "MoorePartial.hpp"
 
 using std::vector;
@@ -89,7 +90,7 @@ MoorePartial<MT>& MoorePartial<MT>::operator=(MoorePartial<MT> &rhs) {
   return rhs;
 }
 
-
+template<int MT>
 bool MoorePartial<MT>::conflict(int vertex1, int group1){
   std::array<int, MT * MT + 1>  mapped_check;
   mapped_check.fill(0);
@@ -112,20 +113,46 @@ bool MoorePartial<MT>::conflict(int vertex1, int group1){
 }
 
 
+template<int MT>
 void MoorePartial<MT>::apply_variable(Variable& var){
   int init = MT + 1;
   int gindex = group_index<MT>(var.group1, var.group2);
-  group_data[init + (MT - 1) * var.group1 + var.vertex1][gindex] = init + (MT - 1) * var.group2 + var.vertex2;
+  graph_data[init + (MT - 1) * var.group1 + var.vertex1][gindex] = init + (MT - 1) * var.group2 + var.last_attempted;
   
   gindex = group_index<MT>(var.group2, var.group1);
-  group_data[init + (MT - 1) * var.group2 + var.vertex2][gindex] = init + (MT - 1) * var.group1 + var.vertex1;
+  graph_data[init + (MT - 1) * var.group2 + var.last_attempted][gindex] = init + (MT - 1) * var.group1 + var.vertex1;
 }
 
+template<int MT>
 void MoorePartial<MT>::unapply_variable(Variable& var){
   int init = MT + 1;
   int gindex = group_index<MT>(var.group1, var.group2);
-  group_data[init + (MT - 1) * var.group1 + var.vertex1][gindex] = -1;
+  graph_data[init + (MT - 1) * var.group1 + var.last_attempted][gindex] = -1;
   
   gindex = group_index<MT>(var.group2, var.group1);
-  group_data[init + (MT - 1) * var.group2 + var.vertex2][gindex] = -1;
+  graph_data[init + (MT - 1) * var.group2 + var.last_attempted][gindex] = -1;
 }
+
+template<int MT>
+std::vector<Variable> MoorePartial<MT>::all_unassigned(){
+
+  Variable var;
+  vector<Variable> vectVariables((MT - 1) * (MT - 1), var);
+
+  for (int grpi = 1; grpi < MT - 1; grpi++) {
+    for (int grpj = grpi + 1; grpj < MT; grpj++) {
+      for (int vertex1 = 0; vertex1 < MT - 2; vertex1++) {
+	var.group1 = grpi;
+	var.vertex1 = vertex1;
+	var.group2 = grpj;
+	var.last_attempted = 0;
+      }
+    }
+  }
+  return vectVariables;
+}
+
+
+template class MoorePartial<3>;
+template class MoorePartial<7>;
+template class MoorePartial<57>;
