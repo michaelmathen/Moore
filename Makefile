@@ -11,8 +11,8 @@ $(TARGET):	$(OBJS)
 
 #all:	$(TARGET)
 
-all: MooreGraph.cpp MooreGraph.hpp Moore.cpp LocalSearch.hpp
-	g++ $(CXXFLAGS) MooreGraph.cpp Moore.cpp LocalSearch.hpp -o Moore
+all: MoorePartial.cpp MoorePartial.hpp Moore.cpp CSP.hpp
+	g++ $(CXXFLAGS) MoorePartial.cpp MoorePartial.hpp Moore.cpp CSP.hpp -o Moore
 
 clean:
 	rm -f $(OBJS) $(TARGET)

@@ -1,7 +1,6 @@
 #include <iostream>
-#include "LocalSearch.hpp"
-#include "SimAnneal.hpp"
-
+#include "CSP.hpp"
+#include "MoorePartial.hpp"
 
 int main(int argc, char* argv[]){
 
