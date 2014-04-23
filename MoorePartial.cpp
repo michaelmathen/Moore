@@ -51,7 +51,7 @@ MoorePartial<MT>::MoorePartial() {
   //Set all the first vertices to -1
   for (int i = 0; i < (MT - 1) * (MT - 1); i++){
     for (int j = 0; j < MT - 2; j++){
-      graph_data[2 * MT + i][j + 2] = -1;
+      graph_data[2 * MT + i].push_back(-1);
     }
   }
 }
@@ -94,9 +94,9 @@ template<int MT>
 bool MoorePartial<MT>::conflict(int vertex1, int group1){
   std::array<int, MT * MT + 1>  mapped_check;
   mapped_check.fill(0);
-
+  int vertex_index = MT + 1 + (MT - 1) * group1 + vertex1;
   for (int i = 0; i < MT; i++) {
-    int adjacent = graph_data[MT + 1 + (MT - 1) * group1 + vertex1][i];
+    int adjacent = graph_data[vertex_index][i];
     if (adjacent != -1) {
       mapped_check[adjacent] += 1;
       for (int j = 0; j < MT; j++) {
@@ -106,7 +106,7 @@ bool MoorePartial<MT>::conflict(int vertex1, int group1){
     }
   }
   for (int i = 0; i < MT * MT  + 1; i++){
-    if (mapped_check[i] > 1)
+    if (i != vertex_index && mapped_check[i] > 1)
       return true;
   }
   return false;
@@ -114,41 +114,59 @@ bool MoorePartial<MT>::conflict(int vertex1, int group1){
 
 
 template<int MT>
-void MoorePartial<MT>::apply_variable(Variable& var){
-  int init = MT + 1;
-  int gindex = group_index<MT>(var.group1, var.group2);
-  graph_data[init + (MT - 1) * var.group1 + var.vertex1][gindex] = init + (MT - 1) * var.group2 + var.last_attempted;
+bool MoorePartial<MT>::apply_variable(Variable& var){
   
-  gindex = group_index<MT>(var.group2, var.group1);
-  graph_data[init + (MT - 1) * var.group2 + var.last_attempted][gindex] = init + (MT - 1) * var.group1 + var.vertex1;
+  int init = MT + 1;
+  //First check to make sure this variable is not already assigned
+  int gindex1 = group_index<MT>(var.group1, var.group2);
+  int gindex2 = group_index<MT>(var.group2, var.group1);
+
+  if (graph_data[init + (MT - 1) * var.group1 + var.vertex1][gindex1] != -1)
+    return false;
+
+  if (graph_data[init + (MT - 1) * var.group2 + var.last_attempted][gindex2] != -1)
+    return false;
+
+  graph_data[init + (MT - 1) * var.group1 + var.vertex1][gindex1] = init + (MT - 1) * var.group2 + var.last_attempted;
+  
+  graph_data[init + (MT - 1) * var.group2 + var.last_attempted][gindex2] = init + (MT - 1) * var.group1 + var.vertex1;
+  //this->printAdjacency();
+
+  if (conflict(var.group2, var.last_attempted)) {
+    unapply_variable(var);
+    return false;
+  }
+  return true;
 }
 
 template<int MT>
 void MoorePartial<MT>::unapply_variable(Variable& var){
   int init = MT + 1;
   int gindex = group_index<MT>(var.group1, var.group2);
-  graph_data[init + (MT - 1) * var.group1 + var.last_attempted][gindex] = -1;
+  graph_data[init + (MT - 1) * var.group1 + var.vertex1][gindex] = -1;
   
   gindex = group_index<MT>(var.group2, var.group1);
   graph_data[init + (MT - 1) * var.group2 + var.last_attempted][gindex] = -1;
 }
 
+
 template<int MT>
 std::vector<Variable> MoorePartial<MT>::all_unassigned(){
 
   Variable var;
-  vector<Variable> vectVariables((MT - 1) * (MT - 1), var);
-
+  vector<Variable> vectVariables;
   for (int grpi = 1; grpi < MT - 1; grpi++) {
-    for (int grpj = grpi + 1; grpj < MT; grpj++) {
-      for (int vertex1 = 0; vertex1 < MT - 2; vertex1++) {
+    for (int vertex1 = 0; vertex1 < MT - 1; vertex1++) {
+      for (int grpj = grpi + 1; grpj < MT; grpj++) {
 	var.group1 = grpi;
 	var.vertex1 = vertex1;
 	var.group2 = grpj;
-	var.last_attempted = 0;
+	var.last_attempted = -1;
+	vectVariables.push_back(var);
       }
     }
   }
+  std::cout << vectVariables.size() << std::endl;
   return vectVariables;
 }
 

@@ -1,4 +1,4 @@
-CXXFLAGS =	-g -Wall -fmessage-length=0 -std=c++11
+CXXFLAGS =	-O2 -Wall -fmessage-length=0 -std=c++11
 
 OBJS =		Moore.o MooreGraph.o
 

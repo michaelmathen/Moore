@@ -61,7 +61,7 @@ public:
   void printAdjacency();
   MoorePartial<MT>& operator=(MoorePartial<MT> &rhs);
   bool conflict(int vertex1, int group1);
-  void apply_variable(Variable& var);
+  bool apply_variable(Variable& var);
   void unapply_variable(Variable& var);
   std::vector<Variable> all_unassigned();
 };
