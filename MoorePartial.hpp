@@ -5,18 +5,10 @@
  *      Author: micmath
  */
 #include <vector>
-
+#include "Variable.hpp"
 
 #ifndef MOOREPARTIAL_HPP_
 #define MOOREPARTIAL_HPP_
-
-typedef struct {
-  int group1;
-  int vertex1;
-  int group2;
-  int last_attempted;
-} Variable;
-
 
 
 template<int MT>
@@ -61,9 +53,10 @@ public:
   void printAdjacency();
   MoorePartial<MT>& operator=(MoorePartial<MT> &rhs);
   bool conflict(int vertex1, int group1);
-  bool apply_variable(Variable& var);
-  void unapply_variable(Variable& var);
-  std::vector<Variable> all_unassigned();
+  bool apply_variable(Variable<MT>& var);
+  void unapply_variable(Variable<MT>& var);
+  bool is_not_assigned(Variable<MT>& var);
+  std::vector<Variable<MT> > all_unassigned();
 };
 
 #endif /* MOOREPARTIAL_HPP_ */

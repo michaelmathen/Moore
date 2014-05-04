@@ -11,8 +11,14 @@ $(TARGET):	$(OBJS)
 
 #all:	$(TARGET)
 
-all: MoorePartial.cpp MoorePartial.hpp Moore.cpp CSP.hpp
-	g++ $(CXXFLAGS) MoorePartial.cpp MoorePartial.hpp Moore.cpp CSP.hpp -o Moore
+PHONY: check-syntax
+
+check-syntax: 
+	g++  $(CXXFLAGS) -Wall -Wextra -fsyntax-only ${CHK_SOURCES}
+
+
+all: MoorePartial.cpp MoorePartial.hpp Moore.cpp CSP.hpp Moore.cpp
+	g++ $(CXXFLAGS) MoorePartial.cpp  Moore.cpp -o Moore
 
 clean:
 	rm -f $(OBJS) $(TARGET)

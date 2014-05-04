@@ -7,6 +7,7 @@
 #include <vector>
 #include <tuple>
 #include <iostream>
+
 #include "MoorePartial.hpp"
 
 using std::vector;
@@ -67,7 +68,7 @@ void MoorePartial<MT>::printAdjacency() {
   for (int i = 0; i < MT * MT + 1; i++) {
     std::cout << i << ") ";
     if (graph_data[i].size() != 0) {
-      for (int j = 0; j < graph_data[i].size() - 1; j++) {
+      for (unsigned int j = 0; j < graph_data[i].size() - 1; j++) {
 	std::cout << graph_data[i][j] << ", ";
       }
       std::cout << graph_data[i][graph_data[i].size() - 1] << std::endl;
@@ -82,7 +83,7 @@ MoorePartial<MT>& MoorePartial<MT>::operator=(MoorePartial<MT> &rhs) {
   if (&rhs == this)
     return *this;
   else {
-    for (int i = 0; i < graph_data.size(); i++) {
+    for (unsigned int i = 0; i < graph_data.size(); i++) {
       std::copy(graph_data[i].begin(), graph_data[i].end(),
 		rhs.graph_data[i].begin());
     }
@@ -112,65 +113,72 @@ bool MoorePartial<MT>::conflict(int vertex1, int group1){
   return false;
 }
 
-
 template<int MT>
-bool MoorePartial<MT>::apply_variable(Variable& var){
-  
+bool MoorePartial<MT>::is_not_assigned(Variable<MT>& var){
+  /*
+    Check to see if this variable will introduce a triangle between 
+    the groups in the graph.
+   */
   int init = MT + 1;
   //First check to make sure this variable is not already assigned
-  int gindex1 = group_index<MT>(var.group1, var.group2);
-  int gindex2 = group_index<MT>(var.group2, var.group1);
+  int gindex1 = group_index<MT>(var.getFirstGroup(), var.getSecondGroup());
+  int gindex2 = group_index<MT>(var.getSecondGroup(), var.getFirstGroup());
 
-  if (graph_data[init + (MT - 1) * var.group1 + var.vertex1][gindex1] != -1)
+  if (graph_data[init + (MT - 1) * var.getFirstGroup() + var.getFirstVertex()][gindex1] != -1)
     return false;
 
-  if (graph_data[init + (MT - 1) * var.group2 + var.last_attempted][gindex2] != -1)
+  if (graph_data[init + (MT - 1) * var.getSecondGroup() + var.getSecondVertex()][gindex2] != -1)
     return false;
 
-  graph_data[init + (MT - 1) * var.group1 + var.vertex1][gindex1] = init + (MT - 1) * var.group2 + var.last_attempted;
-  
-  graph_data[init + (MT - 1) * var.group2 + var.last_attempted][gindex2] = init + (MT - 1) * var.group1 + var.vertex1;
-  //this->printAdjacency();
-
-  if (conflict(var.group2, var.last_attempted)) {
-    unapply_variable(var);
-    return false;
-  }
   return true;
 }
 
 template<int MT>
-void MoorePartial<MT>::unapply_variable(Variable& var){
+bool MoorePartial<MT>::apply_variable(Variable<MT>& var){
+  /*
+    Check to see if the assignement is not possible and then assign the variable if not.
+   */
+  if (!is_not_assigned(var))
+    return false;
+
   int init = MT + 1;
-  int gindex = group_index<MT>(var.group1, var.group2);
-  graph_data[init + (MT - 1) * var.group1 + var.vertex1][gindex] = -1;
+  //First check to make sure this variable is not already assigned
+  int gindex1 = group_index<MT>(var.getFirstGroup(), var.getSecondGroup());
+  int gindex2 = group_index<MT>(var.getSecondGroup(), var.getFirstGroup());
+
+  graph_data[init + (MT - 1) * var.getFirstGroup() + var.getFirstVertex()][gindex1] = init + (MT - 1) * var.getSecondGroup() + var.getSecondVertex();
+  graph_data[init + (MT - 1) * var.getSecondGroup() + var.getSecondVertex()][gindex2] = init + (MT - 1) * var.getFirstGroup() + var.getFirstVertex();
+  return true;
+}
+
+template<int MT>
+void MoorePartial<MT>::unapply_variable(Variable<MT>& var){
+  int init = MT + 1;
+  int gindex = group_index<MT>(var.getFirstGroup(), var.getSecondGroup());
+  graph_data[init + (MT - 1) * var.getFirstGroup() + var.getFirstVertex()][gindex] = -1;
   
-  gindex = group_index<MT>(var.group2, var.group1);
-  graph_data[init + (MT - 1) * var.group2 + var.last_attempted][gindex] = -1;
+  gindex = group_index<MT>(var.getSecondGroup(), var.getFirstGroup());
+  graph_data[init + (MT - 1) * var.getSecondGroup() + var.getSecondVertex()][gindex] = -1;
 }
 
 
 template<int MT>
-std::vector<Variable> MoorePartial<MT>::all_unassigned(){
-
-  Variable var;
-  vector<Variable> vectVariables;
+std::vector<Variable<MT> > MoorePartial<MT>::all_unassigned(){
+  vector<Variable<MT> > vectVariables;
   for (int grpi = 1; grpi < MT - 1; grpi++) {
     for (int vertex1 = 0; vertex1 < MT - 1; vertex1++) {
       for (int grpj = grpi + 1; grpj < MT; grpj++) {
-	var.group1 = grpi;
-	var.vertex1 = vertex1;
-	var.group2 = grpj;
-	var.last_attempted = -1;
-	vectVariables.push_back(var);
+	vectVariables.push_back(Variable<MT>(grpi, vertex1, grpj));
       }
     }
   }
-  std::cout << vectVariables.size() << std::endl;
   return vectVariables;
 }
 
 
+//template class MoorePartial<2>;
 template class MoorePartial<3>;
+//template class MoorePartial<4>;
 template class MoorePartial<7>;
+//template class MoorePartial<8>;
 template class MoorePartial<57>;
