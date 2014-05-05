@@ -6,12 +6,14 @@ class Variable {
   int vertex1;
   int group2;
   int assignment;
+  long possible;
 public:
   Variable(int group1, int vertex1, int group2) {
     this->group1 = group1;
     this->vertex1 = vertex1;
     this->group2 = group2;
-    this->assignment = -1;
+    this->assignment = -1; 
+    possible = 0;
   }
 
 
@@ -20,6 +22,7 @@ public:
     this->vertex1 = vertex1;
     this->group2 = group2;
     this->assignment = vertex2;
+    possible = 0;
   }
 
   ~Variable(){
@@ -40,6 +43,24 @@ public:
     return assignment;
   }
   
+  void removePossible(int i){
+    //Set this particular bit so we know that 
+    //vertex is not available 
+    possible = possible | (0x01 << i);
+  }
+
+  bool isOpen(int i){
+    //Check to see if a vertex is available
+    return possible & (0x01 << i);
+  }
+
+  int numberPossible(){
+    int count = 0;
+    for(int i = 0; i < MT - 1; i++)
+        count += (possible >> i) & 0x01;
+    return MT - 1 - count;
+  }
+
   void assign(int i){
     assignment = i;
   }

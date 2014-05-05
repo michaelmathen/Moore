@@ -57,6 +57,9 @@ public:
   void unapply_variable(Variable<MT>& var);
   bool is_not_assigned(Variable<MT>& var);
   std::vector<Variable<MT> > all_unassigned();
+  void removePossible(Variable<MT>& var);
+  void setInitialGrouping1();
+  void setInitialGrouping2();
 };
 
 #endif /* MOOREPARTIAL_HPP_ */

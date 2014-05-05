@@ -21,6 +21,7 @@ bool constraint_solve(MoorePartial<MT> &graph){
   unsigned long long int j = 0;
   while (true){
     int last_attempted = variable.getSecondVertex();
+
     //We iterate through all the elements in the group we are connected to
     bool assignment_found = false;
     for (int i = last_attempted + 1; i < MT - 1; i++){
@@ -47,6 +48,7 @@ bool constraint_solve(MoorePartial<MT> &graph){
       assigned.pop();
       graph.unapply_variable(variable);
     } else {
+      
       //We found a valid assignment for this variable
       assigned.push(variable);
       if (unassigned.empty()) {
@@ -57,11 +59,11 @@ bool constraint_solve(MoorePartial<MT> &graph){
       unassigned.pop();
     }
     j++;
-    //if (j > 10000) {
-    //graph.printAdjacency();
-    //      std::cout << assigned.size() << std::endl;
-    //j = 0;
-    //}
+    if (j > 1000000) {
+      graph.printAdjacency();
+      std::cout << assigned.size() << std::endl;
+      j = 0;
+    }
     
   }
   return false;

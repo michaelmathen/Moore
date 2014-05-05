@@ -37,22 +37,34 @@ MoorePartial<MT>::MoorePartial() {
     }
   }
 
-  for (int j = 0; j < MT - 1; j++) {
-    int vertex_index = MT + 1 + j;
-    //For edge connections in each vertex
-    for (int k = 1; k < MT; k++) {
-      int edge_index = MT + 1 + k * (MT - 1) + j;
-      //Each each of the 56 edges connect to one vertex in
-      //each group
-      graph_data[vertex_index].push_back(edge_index);
-      graph_data[edge_index].push_back(vertex_index);
+  //For each of the groups
+  for (int i = 0; i < MT; i++){
+    //For all the elements in the groups
+    for (int j = 0; j < MT - 1; j++){
+      for (int k = 0; k < MT - 1; k++){
+	graph_data[1 + MT + (MT - 1) * i + k].push_back(-1);
+      }
     }
   }
+}
 
-  //Set all the first vertices to -1
-  for (int i = 0; i < (MT - 1) * (MT - 1); i++){
-    for (int j = 0; j < MT - 2; j++){
-      graph_data[2 * MT + i].push_back(-1);
+
+template<int MT>
+void MoorePartial<MT>::setInitialGrouping1(){
+  for (int i = 0; i < MT - 1; i++){
+    for (int j = 0; j < MT - 1; j++){
+      graph_data[1 + MT + i][1 + j] = 2 * MT + (MT - 1) * j + i;
+      graph_data[2 * MT + (MT - 1) * j + i][1] = 1 + MT + i;
+    }
+  }
+}
+
+template<int MT>
+void MoorePartial<MT>::setInitialGrouping2(){
+  for (int i = 0; i < MT - 1; i++){
+    for (int j = 0; j < MT - 1; j++){
+      graph_data[1 + MT + i][1 + j] = 2 * MT + (MT - 1) * j + i;
+      graph_data[2 * MT + (MT - 1) * j + i][1] = 1 + MT + i;
     }
   }
 }
@@ -161,14 +173,33 @@ void MoorePartial<MT>::unapply_variable(Variable<MT>& var){
   graph_data[init + (MT - 1) * var.getSecondGroup() + var.getSecondVertex()][gindex] = -1;
 }
 
+template<int MT>
+void MoorePartial<MT>::removePossible(Variable<MT>& var){
+
+  int vertex_index = MT + 1 + (MT - 1) * var.getFirstGroup() + var.getFirstVertex();
+
+  for (int i = 0; i < MT; i++) {
+    int adjacent = graph_data[vertex_index][i];
+    if (adjacent != -1) {
+      if ((adjacent - MT - 1) / (MT - 1) == var.getSecondGroup())
+	var.removePossible((adjacent - MT - 1) % (MT - 1));
+      for (int j = 0; j < MT; j++) {
+	if ((graph_data[adjacent][j] - MT - 1) / (MT - 1) == var.getSecondGroup())
+	  var.removePossible((adjacent - MT - 1) % (MT - 1));
+      }
+    }
+  }
+}
 
 template<int MT>
 std::vector<Variable<MT> > MoorePartial<MT>::all_unassigned(){
   vector<Variable<MT> > vectVariables;
-  for (int grpi = 1; grpi < MT - 1; grpi++) {
-    for (int vertex1 = 0; vertex1 < MT - 1; vertex1++) {
-      for (int grpj = grpi + 1; grpj < MT; grpj++) {
-	vectVariables.push_back(Variable<MT>(grpi, vertex1, grpj));
+  for (int groupi = 0; groupi < MT; groupi++){
+    for (int v1 = 0; v1 < MT - 1; v1++){
+      for (int groupj = groupi + 1; groupj < MT; groupj++) {
+	int vertex_index1 = 1 + MT + groupi * (MT - 1) + v1;
+	if (graph_data[vertex_index1][groupj] == -1)	  
+	  vectVariables.push_back(Variable<MT>(groupi, v1, groupj));
       }
     }
   }
