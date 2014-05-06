@@ -60,7 +60,7 @@ bool constraint_solve(MoorePartial<MT> &graph){
     }
     j++;
     if (j > 1000000) {
-      graph.printAdjacency();
+      //graph.printAdjacency();
       std::cout << assigned.size() << std::endl;
       j = 0;
     }

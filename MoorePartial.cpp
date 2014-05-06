@@ -53,21 +53,46 @@ template<int MT>
 void MoorePartial<MT>::setInitialGrouping1(){
   for (int i = 0; i < MT - 1; i++){
     for (int j = 0; j < MT - 1; j++){
-      graph_data[1 + MT + i][1 + j] = 2 * MT + (MT - 1) * j + i;
-      graph_data[2 * MT + (MT - 1) * j + i][1] = 1 + MT + i;
+      addEdge(i, 0, i, j + 1);
     }
   }
 }
 
+
+
 template<int MT>
 void MoorePartial<MT>::setInitialGrouping2(){
+  //grab the first four groups
+  //for (int i = 0; i < MT / 2; i++){
+  //  addMapping(2 * i, 2 * i + 1);
+  //}
+}
+
+template<int MT> 
+void MoorePartial<MT>::addMapping(int g1, int g2){
   for (int i = 0; i < MT - 1; i++){
-    for (int j = 0; j < MT - 1; j++){
-      graph_data[1 + MT + i][1 + j] = 2 * MT + (MT - 1) * j + i;
-      graph_data[2 * MT + (MT - 1) * j + i][1] = 1 + MT + i;
-    }
+    addEdge(i, g1, i, g2);
   }
 }
+
+template<int MT>
+void MoorePartial<MT>::addEdge(int v1, int g1, int v2, int g2){
+  auto fst_index = g1 < g2 ? g2 : g2 + 1;
+  auto snd_index = g1 < g2 ? g1 + 1 : g1;
+  graph_data[1 + MT + (MT - 1) * g1 + v1][fst_index] = 1 + MT + (MT - 1) * g2 + v2;
+  graph_data[1 + MT + (MT - 1) * g2 + v2][snd_index] = 1 + MT + (MT - 1) * g1 + v1;
+}
+
+template<int MT>
+void MoorePartial<MT>::addEdge(int v1, int v2){
+  auto g1 = (v1 - MT - 1) / (MT - 1);
+  auto g2 = (v2 - MT - 1) / (MT - 1);
+  auto fst_index = g1 < g2 ? g2 : g2 + 1;
+  auto snd_index = g1 < g2 ? g1 + 1 : g1;
+  graph_data[v1][fst_index] = v2;
+  graph_data[v2][snd_index] = v1;
+}
+
 
 template<int MT>
 MoorePartial<MT>::~MoorePartial() {}
@@ -152,25 +177,32 @@ bool MoorePartial<MT>::apply_variable(Variable<MT>& var){
    */
   if (!is_not_assigned(var))
     return false;
-
-  int init = MT + 1;
-  //First check to make sure this variable is not already assigned
-  int gindex1 = group_index<MT>(var.getFirstGroup(), var.getSecondGroup());
-  int gindex2 = group_index<MT>(var.getSecondGroup(), var.getFirstGroup());
-
-  graph_data[init + (MT - 1) * var.getFirstGroup() + var.getFirstVertex()][gindex1] = init + (MT - 1) * var.getSecondGroup() + var.getSecondVertex();
-  graph_data[init + (MT - 1) * var.getSecondGroup() + var.getSecondVertex()][gindex2] = init + (MT - 1) * var.getFirstGroup() + var.getFirstVertex();
+  addEdge(var.getFirstVertex(), var.getFirstGroup(), var.getSecondVertex(), var.getSecondGroup());
   return true;
 }
 
 template<int MT>
+void MoorePartial<MT>::removeEdge(int v1, int g1, int v2, int g2){
+  auto fst_index = g1 < g2 ? g2 : g2 + 1;
+  auto snd_index = g1 < g2 ? g1 + 1 : g1;
+  graph_data[1 + MT + (MT - 1) * g1 + v1][fst_index] = -1;
+  graph_data[1 + MT + (MT - 1) * g2 + v2][snd_index] = -1;
+
+}
+
+template<int MT>
+void MoorePartial<MT>::removeEdge(int v1, int v2){
+  auto g1 = (v1 - MT - 1) / (MT - 1);
+  auto g2 = (v2 - MT - 1) / (MT - 1);
+  auto fst_index = g1 < g2 ? g2 : g2 + 1;
+  auto snd_index = g1 < g2 ? g1 + 1 : g1;
+  graph_data[v1][fst_index] = -1;
+  graph_data[v2][snd_index] = -1;
+}
+
+template<int MT>
 void MoorePartial<MT>::unapply_variable(Variable<MT>& var){
-  int init = MT + 1;
-  int gindex = group_index<MT>(var.getFirstGroup(), var.getSecondGroup());
-  graph_data[init + (MT - 1) * var.getFirstGroup() + var.getFirstVertex()][gindex] = -1;
-  
-  gindex = group_index<MT>(var.getSecondGroup(), var.getFirstGroup());
-  graph_data[init + (MT - 1) * var.getSecondGroup() + var.getSecondVertex()][gindex] = -1;
+  removeEdge(var.getFirstVertex(), var.getFirstGroup(), var.getSecondVertex(), var.getSecondGroup());
 }
 
 template<int MT>

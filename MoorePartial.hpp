@@ -40,18 +40,25 @@ int vertex_index(int vertex1, int group2){
     return group2;
   else
     return group2 + 1;
-
 }
+
+
 
 template<int MT>
 class MoorePartial {
   int current_vertex;
   std::vector<std::vector<int> > graph_data;
+  void addEdge(int v1, int g1, int v2, int g2);
+  void addEdge(int v1, int v2);
+  void removeEdge(int v1, int v2);
+  void removeEdge(int v1, int g1, int v2, int g2);
+
 public:
   MoorePartial();
   virtual ~MoorePartial();
   void printAdjacency();
   MoorePartial<MT>& operator=(MoorePartial<MT> &rhs);
+  void addMapping(int g1, int g2);
   bool conflict(int vertex1, int group1);
   bool apply_variable(Variable<MT>& var);
   void unapply_variable(Variable<MT>& var);
