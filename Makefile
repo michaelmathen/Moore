@@ -1,24 +1,23 @@
+
 CXXFLAGS =	-O2 -Wall -fmessage-length=0 -std=c++11
 
-OBJS =		Moore.o MooreGraph.o
+LIBS = -lgmpxx -lgmp
 
-LIBS =
+CC = g++
 
-TARGET =	Moore 
-
-$(TARGET):	$(OBJS)
-	$(CXX) -o $(TARGET) $(OBJS) $(LIBS)
-
-#all:	$(TARGET)
-
-PHONY: check-syntax
+SOURCES_CPP = MoorePartial.cpp Moore.cpp Moore.cpp Permutation.cpp
+SOURCES_HPP = MoorePartial.hpp Permutation.hpp 
 
 check-syntax: 
-	g++  $(CXXFLAGS) -Wall -Wextra -fsyntax-only ${CHK_SOURCES}
+	$(CC)  $(CXXFLAGS) -Wall -Wextra -fsyntax-only ${CHK_SOURCES}
 
 
-all: MoorePartial.cpp MoorePartial.hpp Moore.cpp CSP.hpp Moore.cpp
-	g++ $(CXXFLAGS) MoorePartial.cpp  Moore.cpp -o Moore
+objects: $(SOURCES_CPP)
+	$(CC) $(CXXFLAGS) -c $^ 
 
-clean:
-	rm -f $(OBJS) $(TARGET)
+
+all: $(SOURCES_HPP) objects
+	$(CC) $(CXXFLAGS) *.o ${LIBS} -o Moore 
+
+clean: 	
+	rm *.o

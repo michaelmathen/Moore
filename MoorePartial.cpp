@@ -69,6 +69,13 @@ void MoorePartial<MT>::setInitialGrouping2(){
 }
 
 template<int MT> 
+void MoorePartial<MT>::addMapping(int g1, int g2, std::vector<int>& mapping){
+  for (int i = 0; i < MT - 1; i++){
+    addEdge(i, g1, mapping[i], g2);
+  }
+}
+
+template<int MT> 
 void MoorePartial<MT>::addMapping(int g1, int g2){
   for (int i = 0; i < MT - 1; i++){
     addEdge(i, g1, i, g2);
@@ -151,6 +158,57 @@ bool MoorePartial<MT>::conflict(int vertex1, int group1){
 }
 
 template<int MT>
+bool MoorePartial<MT>::isFinished(){
+  std::array<int, MT * MT + 1>  mapped_check;
+  for (int i = 0; i < MT * MT + 1; i++) {
+    mapped_check.fill(0);
+    for (int j = 0; j < MT; j++) {
+      int adjacent = graph_data[i][j];
+      if (adjacent == -1) 
+	return false;
+      mapped_check[adjacent] += 1;
+      for (int k = 0; k < MT; k++) {
+	if (graph_data[adjacent][k] == -1)
+	  return false;
+	mapped_check[graph_data[adjacent][k]] += 1;
+      }
+    }
+    for (int j = 0; j < MT * MT  + 1; j++){
+      if ((i != j) && (mapped_check[j] != 1))
+	return false;
+    }
+  }
+  return true;
+}
+
+
+template<int MT>
+void MoorePartial<MT>::printReached(){
+  std::array<int, MT * MT + 1>  mapped_check;
+  for (int i = 0; i < MT * MT + 1; i++)
+    std::cout << i << ", " ;
+  std::cout<<std::endl;
+  for (int i = 0; i < MT * MT + 1; i++) {
+    mapped_check.fill(0);
+    for (int j = 0; j < MT; j++) {
+      int adjacent = graph_data[i][j];
+      if (adjacent == -1) 
+	continue;
+      mapped_check[adjacent] += 1;
+      for (int k = 0; k < MT; k++) {
+	if (graph_data[adjacent][k] == -1)
+	  continue;
+	mapped_check[graph_data[adjacent][k]] += 1;
+      }
+    }
+    for (int j = 0; j < MT * MT  + 1; j++){
+       std::cout << mapped_check[j] << ", ";
+    } 
+    std::cout << std::endl;
+  }
+}
+
+template<int MT>
 bool MoorePartial<MT>::is_not_assigned(Variable<MT>& var){
   /*
     Check to see if this variable will introduce a triangle between 
@@ -168,6 +226,29 @@ bool MoorePartial<MT>::is_not_assigned(Variable<MT>& var){
     return false;
 
   return true;
+}
+
+template<int MT>
+void MoorePartial<MT>::printMappings(){
+  for (auto i = 0; i < MT - 1; i++) {
+    for (auto j = i + 1; j < MT; j++){
+      std::cout << i << ", " << j << "   "; 
+      for (auto el : getMapping(i, j)){
+	std::cout << el <<", ";
+      }
+      std::cout << std::endl;
+    }
+  }
+}
+
+template<int MT>
+std::vector<int> MoorePartial<MT>::getMapping(int g1, int g2){
+  int gindex1 = group_index<MT>(g1, g2);
+  vector<int> vect(MT - 1, 0);
+  for (int i = 0; i < MT - 1; i++){
+    vect[i] = graph_data[MT + 1 + (MT - 1) * g1 + i][gindex1] - MT - 1 - (MT - 1) * g2 ;
+  }
+  return vect;
 }
 
 template<int MT>
@@ -222,7 +303,13 @@ void MoorePartial<MT>::removePossible(Variable<MT>& var){
     }
   }
 }
-
+/*
+//Figure out how constricted this variable is.
+template<int MT>
+void MoorePartial<MT>::constrain(std::vector<Variable<MT> >& vars){
+  
+}
+*/
 template<int MT>
 std::vector<Variable<MT> > MoorePartial<MT>::all_unassigned(){
   vector<Variable<MT> > vectVariables;

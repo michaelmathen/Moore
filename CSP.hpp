@@ -5,6 +5,19 @@
 #include <iostream>
 #include "MoorePartial.hpp"
 
+template<int MT>
+void addMapping(MoorePartial<MT> &graph){
+  auto vec = dearangementSets(MT - 1);
+
+  for (auto j = 1; j < MT; j++){
+    graph.addMapping(0, j, vec[0]);
+  }
+
+
+  for (auto j = 2; j < MT; j++){
+    graph.addMapping(1, j, vec[j - 1]);
+  }
+}
 
 template<int MT>
 bool constraint_solve(MoorePartial<MT> &graph){
@@ -68,3 +81,5 @@ bool constraint_solve(MoorePartial<MT> &graph){
   }
   return false;
 }
+
+
