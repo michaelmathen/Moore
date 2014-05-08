@@ -230,14 +230,17 @@ bool MoorePartial<MT>::is_not_assigned(Variable<MT>& var){
 
 template<int MT>
 void MoorePartial<MT>::printMappings(){
-  for (auto i = 0; i < MT - 1; i++) {
-    for (auto j = i + 1; j < MT; j++){
-      std::cout << i << ", " << j << "   "; 
-      for (auto el : getMapping(i, j)){
-	std::cout << el <<", ";
+  for (auto i = 0; i < MT; i++) {
+    for (auto j = 0; j < MT; j++){
+      if (i != j) {
+	std::cout << "((" << i << ", " << j << "),   ["; 
+	for (auto el : getMapping(i, j)){
+	  std::cout << el << ", ";
+	}
+	std::cout << "]),"<< std::endl;
       }
-      std::cout << std::endl;
     }
+    std::cout << std::endl;
   }
 }
 
