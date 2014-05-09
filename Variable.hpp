@@ -28,18 +28,18 @@ public:
   ~Variable(){
   }
 
-  int getFirstGroup(){
+  int getFirstGroup() const {
     return group1;
   }
 
-  int getSecondGroup(){
+  int getSecondGroup() const {
     return group2;
   }
 
-  int getFirstVertex(){
+  int getFirstVertex() const {
     return vertex1;
   }
-  int getSecondVertex(){
+  int getSecondVertex() const {
     return assignment;
   }
   
@@ -65,7 +65,7 @@ public:
     assignment = i;
   }
 
-  void print(){
+  void print() const {
     std::cout << "Variable{" << std::endl;
     std::cout << "group1=" << this->group1 << std::endl;
     std::cout << "vertex1=" << this->vertex1 << std::endl;
@@ -76,4 +76,5 @@ public:
   void unassign(){
     assignment = -1;
   }
+
 };

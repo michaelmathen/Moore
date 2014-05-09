@@ -60,6 +60,7 @@ public:
   MoorePartial<MT>& operator=(MoorePartial<MT> &rhs);
   void addMapping(int g1, int g2);
   void addMapping(int g1, int g2, std::vector<int>& mapping);
+  void printMapping(int g1, int g2);
   bool conflict(int vertex1, int group1);
   bool apply_variable(Variable<MT>& var);
   void unapply_variable(Variable<MT>& var);
@@ -70,7 +71,9 @@ public:
   void setInitialGrouping2();
   bool isFinished();
   void printReached();
+  void setPairs();
   std::vector<int> getMapping(int g1, int g2);
+  std::vector<int> getVertexMapping(int v1, int g2);
   void printMappings();
 };
 

@@ -88,7 +88,7 @@ def printLatinSquareIndex(el_ith):
 
 for i in xrange(7):
     print ""
-    #printReducedLatinSquares(i)
-    printLatinSquareIndex(i)
+    printReducedLatinSquares(i)
+    #printLatinSquareIndex(i)
 
 

@@ -56,6 +56,12 @@ void MoorePartial<MT>::setInitialGrouping1(){
       addEdge(i, 0, i, j + 1);
     }
   }
+  for (int i = 1; i < MT - 1; i++){
+    addEdge(i, i + 1, 0, 1);
+  }
+  //for (int i = 1; i < MT - 1; i++){
+  //addEdge(i, 1, 0, i + 1);
+  //}
 }
 
 
@@ -133,6 +139,25 @@ MoorePartial<MT>& MoorePartial<MT>::operator=(MoorePartial<MT> &rhs) {
     }
   }
   return rhs;
+}
+
+template<int MT>
+void MoorePartial<MT>::setPairs(){
+  int start_index = MT + 1;
+  for (int grpi = 0; grpi < MT - 1; grpi++){
+    for (int v1 = 0; v1 < MT - 1; v1++){
+      for (int grpj = grpi + 1; grpj < MT; grpj++){
+	int gindex = group_index<MT>(grpi, grpj);
+	if (graph_data[start_index + grpi * (MT - 1) + v1][gindex] 
+	    != -1){
+	  //We look at the vertex that we map too
+	  int vmap = graph_data[start_index + grpi * (MT - 1) + v1][gindex];
+	  int v2 = (vmap - start_index) % (MT - 1);
+	  addEdge(v2, grpi, v1, grpj);
+	}
+      }
+    }
+  }
 }
 
 template<int MT>
@@ -245,11 +270,34 @@ void MoorePartial<MT>::printMappings(){
 }
 
 template<int MT>
+void MoorePartial<MT>::printMapping(int g1, int g2){
+  int gindex1 = group_index<MT>(g1, g2);
+  for (int i = 0; i < MT - 1; i++){
+    auto tmp = graph_data[MT + 1 + (MT - 1) * g1 + i][gindex1] - MT - 1 - (MT - 1) * g2 ;
+    std::cout << tmp << " " ;
+  }
+  std::cout << std::endl;
+}
+
+
+template<int MT>
 std::vector<int> MoorePartial<MT>::getMapping(int g1, int g2){
   int gindex1 = group_index<MT>(g1, g2);
   vector<int> vect(MT - 1, 0);
   for (int i = 0; i < MT - 1; i++){
     vect[i] = graph_data[MT + 1 + (MT - 1) * g1 + i][gindex1] - MT - 1 - (MT - 1) * g2 ;
+  }
+  return vect;
+}
+
+template<int MT>
+std::vector<int> MoorePartial<MT>::getVertexMapping(int v1, int g1){
+  vector<int> vect(MT - 1, 0);
+  //We iterate over each of the groups and look at our respective vertex 
+  //mapping in that group.
+  int vertex_index = MT + 1 + (MT - 1) * g1 + v1;
+  for (int i = 0; i < MT - 1; i++){
+    vect[i] = (graph_data[vertex_index][i + 1] - MT - 1) % (MT - 1);
   }
   return vect;
 }
@@ -264,6 +312,7 @@ bool MoorePartial<MT>::apply_variable(Variable<MT>& var){
   addEdge(var.getFirstVertex(), var.getFirstGroup(), var.getSecondVertex(), var.getSecondGroup());
   return true;
 }
+
 
 template<int MT>
 void MoorePartial<MT>::removeEdge(int v1, int g1, int v2, int g2){
