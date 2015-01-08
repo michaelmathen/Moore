@@ -6,6 +6,7 @@
 #include <unordered_set>
 #include <queue>
 #include "MoorePartial.hpp"
+#include "Permutation.hpp"
 
 template<int MT>
 void addMapping(MoorePartial<MT> &graph){
@@ -35,12 +36,6 @@ bool constraint_solve(MoorePartial<MT> &graph) {
   unsigned long long int j = 0;
   while (true){
     int last_attempted = variable.getSecondVertex();
-    //auto gmap = graph.getMapping(first_group, second_group);    
-    //auto vmap = graph.getVertexMapping(first_vertex, first_group);
-    
-    //std::set<int> possible_vertices(gmap.begin(), gmap.end());
-    //possible_vertices.insert(vmap.begin(), vmap.end());
-    
     //We iterate through all the elements in the group we are
     //connected to
     bool assignment_found = false;
@@ -156,25 +151,12 @@ bool constraint_solve_pair(MoorePartial<MT> &graph) {
   unsigned long long int j = 0;
   while (true){
 
-    // int first_group = variable.getFirstGroup();
-    // int second_group = variable.getFirstGroup();
-    // int first_vertex = variable.getFirstVertex();
     int last_attempted = variable.getSecondVertex();
-
-    // auto gmap = graph.getMapping(first_group, second_group);    
-    // auto vmap = graph.getVertexMapping(first_vertex, first_group);
-    
-    // std::set<int> possible_vertices(gmap.begin(), gmap.end());
-    // possible_vertices.insert(vmap.begin(), vmap.end());
     
     //We iterate through all the elements in the group we are
     //connected to
     bool assignment_found = false;
     for (int i = last_attempted + 1; i < MT - 1; i++){
-      // if (possible_vertices.find(i) != possible_vertices.end()) {
-      //   //Have to be a derangement in the columns
-      //   continue;
-      // }
       variable.assign(i);
       auto paired_variable = pairedVar<MT>(variable);
 
@@ -230,13 +212,10 @@ bool constraint_solve_pair(MoorePartial<MT> &graph) {
       paired_variable.unassign();
       unassigned.push(paired_variable);
     } 
-    //std::cout<< unassigned.size() << std::endl;
-
     j++;
     if (j > 10000) {
       graph.printMapping(variable.getFirstGroup(),variable.getSecondGroup());
-     
-      //graph.printAdjacency();
+
       std::cout << variable.getFirstGroup() << std::endl;
       std::cout << variable.getSecondGroup() << std::endl;
       std::cout << vect.size() / 2 << std::endl;
@@ -247,100 +226,3 @@ bool constraint_solve_pair(MoorePartial<MT> &graph) {
   }
   return false;
 }
-/*
-
-  template<int MT>
-bool constraint_solve_pair(MoorePartial<MT> &graph){
-  //Make sure the graph is set up so that all matching pairs are set.
-  graph.setInitialGrouping1();
-  graph.setPairs();
-
-  auto vect = graph.all_unassigned();
-  unsigned int variable_number = vect.size();
-
-  std::deque<Variable<MT> > assigned;
-  std::deque<Variable<MT> > unassigned(vect.begin(), vect.end());
-  using setType = std::unordered_set<Variable<MT>, HashFunction<MT> >;
-  setType assigned_variable_set;
-
-  //Define a pop front function that could come in handy.
-  auto pop_front = [](decltype(unassigned_variables)& set){
-    auto front_iterator = set.begin();
-    auto tmp = *front_iterator;
-    set.erase(front_iterator);
-    return tmp;
-  };
-
-  auto variable = unassigned.front();
-  unassigned.pop_front();
-
-  unsigned long long int j = 0;
-  while (true){
-    int last_attempted = variable.getSecondVertex();
-    
-    //We iterate through all the elements in the group we are connected to
-    bool assignment_found = false;
-    //graph.printMappings();
-    
-    for (int i = last_attempted + 1; i < MT - 1; i++){
-      variable.assign(i);
-      auto paired_variable = pairedVar<MT>(variable);
-      //Try to assign the variables an assignment in the group 
-      if (!graph.apply_variable(variable))	  
-	continue;
-      //This should fail if we have already found its paired variable before.
-      if (!graph.apply_variable(paired_variable)){
-	graph.unapply_variable(variable);
-	continue;
-      }
-
-      // if (!graph.conflict(variable.getSecondVertex(), 
-      // 			  variable.getSecondGroup()) &&
-      // 	  !graph.conflict(paired_variable.getSecondVertex(), 
-      // 			  paired_variable.getSecondGroup())) {
-      // 	  unassigned_variables.erase(paired_variable);
-      // 	  assignment_found = true;
-      // 	  break;
-      // }
-
-      assignment_found = true;
-      break;
-      graph.unapply_variable(variable);
-      graph.unapply_variable(paired_variable);
-    }
-    //If we can't find a mapping then one of our earlier assignments was wrong
-    if (!assignment_found){
-
-      //Put it back on the unassigned pile.
-      variable.unassign();
-      unassigned.push_front(variable);
-
-      if (assigned.empty()) 
-	return false;
-
-      variable = assigned.front();
-      assigned.pop_front();
-      auto paired_variable = pairedVar<MT>(variable);
-      graph.unapply_variable(variable);
-      graph.unapply_variable(paired_variable);
-    } else {
-      graph.printMapping(5, 6);
-      //We found a valid assignment for this variable
-      assigned.push_front(variable);
-      if (unassigned_variables.empty()) {
-	std::cout << "Total number of iterations: " << j << std::endl;
-	return true;
-      }
-      variable = pop_front(unassigned_variables);
-    }
-    j++;
-    if (j > 10000) {
-      //graph.printAdjacency();
-      std::cout << assigned.size() << std::endl;
-      j = 0;
-    }
-    
-  }
-  return false;
-}
-*/

@@ -115,8 +115,8 @@ void MoorePartial<MT>::printAdjacency() {
   /*
     Prints the adjacency list out for debugging purposes.
   */
+  std::cout << "This is  A^2 + A where A is the adjacency matrix of the graph" << std::endl;
   for (int i = 0; i < MT * MT + 1; i++) {
-    std::cout << i << ") ";
     if (graph_data[i].size() != 0) {
       for (unsigned int j = 0; j < graph_data[i].size() - 1; j++) {
 	std::cout << graph_data[i][j] << ", ";
@@ -255,6 +255,15 @@ bool MoorePartial<MT>::is_not_assigned(Variable<MT>& var){
 
 template<int MT>
 void MoorePartial<MT>::printMappings(){
+  /*
+    If you take a Moore graph with girth 5 you can pick it up from 
+    any vertex and the first layers will be tree shaped with 
+    no loops. The layer below that will be the same for all elements
+    that are neighbors to the same vertex but will have edges with
+    one vertex in each other group. 
+    This prints the mappings between two 
+    groups at the lowest level of the tree.
+   */
   for (auto i = 0; i < MT; i++) {
     for (auto j = 0; j < MT; j++){
       if (i != j) {
