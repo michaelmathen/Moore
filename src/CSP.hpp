@@ -6,8 +6,8 @@
 #include <unordered_set>
 #include <queue>
 #include "MoorePartial.hpp"
-#include "Permutation.hpp"
-
+//#include "Permutation.hpp"
+/*
 template<int MT>
 void addMapping(MoorePartial<MT> &graph){
   auto vec = dearangementSets(MT - 1);
@@ -21,6 +21,7 @@ void addMapping(MoorePartial<MT> &graph){
     graph.addMapping(1, j, vec[j - 1]);
   }
 }
+*/
 
 template<int MT>
 bool constraint_solve(MoorePartial<MT> &graph) {
